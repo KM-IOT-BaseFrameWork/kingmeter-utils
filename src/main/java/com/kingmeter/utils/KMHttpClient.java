@@ -9,28 +9,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.*;
-import org.apache.http.config.Registry;
-import org.apache.http.config.RegistryBuilder;
-import org.apache.http.conn.socket.ConnectionSocketFactory;
-import org.apache.http.conn.socket.PlainConnectionSocketFactory;
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
 import java.io.IOException;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 
 @Slf4j
@@ -50,40 +36,6 @@ public class KMHttpClient {
     @Value("${log.http:true}")
     private boolean log_http = true;
 
-    @Autowired
-    private CloseableHttpClient closeableHttpClient;
-
-    @Bean(name = "closeableHttpClient")
-    public CloseableHttpClient getCloseableHttpClient() throws NoSuchAlgorithmException, KeyManagementException {
-        SSLContext sc = SSLContext.getInstance("TLSv1.2");
-        // implement X509TrustManager , avoid validation
-        X509TrustManager trustManager = new X509TrustManager() {
-            @Override
-            public void checkClientTrusted(
-                    java.security.cert.X509Certificate[] paramArrayOfX509Certificate,
-                    String paramString) {
-            }
-
-            @Override
-            public void checkServerTrusted(
-                    java.security.cert.X509Certificate[] paramArrayOfX509Certificate,
-                    String paramString) {
-            }
-
-            @Override
-            public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-                return null;
-            }
-        };
-        sc.init(null, new TrustManager[]{trustManager}, null);
-        Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory>create()
-                .register("http", PlainConnectionSocketFactory.INSTANCE)
-                .register("https", new SSLConnectionSocketFactory(sc))
-                .build();
-        PoolingHttpClientConnectionManager connManager = new PoolingHttpClientConnectionManager(socketFactoryRegistry);
-        HttpClients.custom().setConnectionManager(connManager);
-        return HttpClients.custom().setConnectionManager(connManager).build();
-    }
 
     private ResponseData getResponseData(CloseableHttpResponse execute) throws IOException {
         CloseableHttpResponse response = execute;
@@ -117,7 +69,7 @@ public class KMHttpClient {
             if (StringUtil.isNotEmpty(tokenKey)) {
                 base.setHeader(tokenKey, tokenValue);
             }
-            ResponseData result = getResponseData(closeableHttpClient.execute(base));
+            ResponseData result = getResponseData(CloseableHttpClientBeanUtil.getInstance().getCloseableHttpClient().execute(base));
             log_response(url, deviceId, JSON.toJSONString(result));
             return result;
         } catch (Exception e) {
