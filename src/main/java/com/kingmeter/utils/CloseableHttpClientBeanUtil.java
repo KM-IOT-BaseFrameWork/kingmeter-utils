@@ -1,17 +1,17 @@
 package com.kingmeter.utils;
 
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.http.config.ConnectionConfig;
 import org.apache.http.config.Registry;
 import org.apache.http.config.RegistryBuilder;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.conn.socket.PlainConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.springframework.stereotype.Component;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
@@ -77,8 +77,9 @@ public class CloseableHttpClientBeanUtil {
                 .register("https", new SSLConnectionSocketFactory(sc))
                 .build();
         PoolingHttpClientConnectionManager connManager = new PoolingHttpClientConnectionManager(socketFactoryRegistry);
-        HttpClients.custom().setConnectionManager(connManager);
-        return HttpClients.custom().setConnectionManager(connManager).build();
+        connManager.setDefaultConnectionConfig(ConnectionConfig.DEFAULT);
+        HttpClientBuilder builder = HttpClients.custom().setConnectionManager(connManager);
+        return builder.build();
     }
 
 }

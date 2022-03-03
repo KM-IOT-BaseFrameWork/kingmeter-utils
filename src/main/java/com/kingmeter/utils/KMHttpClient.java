@@ -8,15 +8,17 @@ import com.kingmeter.common.ResponseData;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.*;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 
 @Slf4j
@@ -24,7 +26,7 @@ import java.util.Map;
 public class KMHttpClient {
 
     @Value("${kingmeter.business.baseUrl:url}")
-    private String baseUrl;
+    private String baseUrl = "";
 
     @Value("${kingmeter.tokenKey:tokenKey}")
     private String tokenKey;
@@ -65,15 +67,27 @@ public class KMHttpClient {
     }
 
     private ResponseData execute(HttpRequestBase base, String url, long deviceId) {
+        CloseableHttpClient client = null;
+        ResponseData result = null;
         try {
             if (StringUtil.isNotEmpty(tokenKey)) {
                 base.setHeader(tokenKey, tokenValue);
             }
-            ResponseData result = getResponseData(CloseableHttpClientBeanUtil.getInstance().getCloseableHttpClient().execute(base));
+            client = CloseableHttpClientBeanUtil.getInstance().getCloseableHttpClient();
+            result = getResponseData(client.execute(base));
             log_response(url, deviceId, JSON.toJSONString(result));
             return result;
         } catch (Exception e) {
             log_response(url, deviceId, e.getMessage());
+            base.abort();
+            base.releaseConnection();
+        } finally {
+            if (result != null) {
+                if (result.getCode() != HttpStatus.SC_OK) {
+                    base.abort();
+                    base.releaseConnection();
+                }
+            }
         }
 
         return new ResponseData(ResponseCode.NOT_FOUND, "");
@@ -93,6 +107,11 @@ public class KMHttpClient {
         log_request(url, deviceId, "GET", sb.toString());
 
         HttpGet get = new HttpGet(url);
+//        RequestConfig.Builder builder = RequestConfig.custom();
+//        builder.setSocketTimeout(3000)//3.1设置客户端等待服务端返回数据的超时时间
+//                .setConnectTimeout(1000)//3.2设置客户端发起TCP连接请求的超时时间
+//                .setConnectionRequestTimeout(1000);//3.3设置客户端从连接池获取链接的超时时间
+//        get.setConfig(builder.build());
         return execute(get, url, deviceId);
     }
 
@@ -161,6 +180,15 @@ public class KMHttpClient {
                     "{}|{}|{}", deviceId, url, responseData);
         }
     }
+
+//    public static void main(String[] args) {
+//        Map<String, Object> map = new HashMap<>();
+//        KMHttpClient client = new KMHttpClient();
+//        for (int i = 0; i < 10; i++) {
+//            client.get(map, "http://127.0.0.1:8080/demo", 1);
+//            client.get(map, "http://127.0.0.1:8080/demo2", 1);
+//        }
+//    }
 
 }
 
