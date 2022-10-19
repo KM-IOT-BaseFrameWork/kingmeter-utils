@@ -70,6 +70,12 @@ public class GpsUtils {
         return changeHead(head) * (Integer.parseInt(first) + lastDouble);
     }
 
+
+//    public static void main(String[] args) {
+//        System.out.println(GpsUtils.getInstance().calculateGps("W07642.51577"));
+//        System.out.println(GpsUtils.getInstance().calculateGps("N6645.80423"));
+//    }
+
     private int changeHead(String head) {
         switch (head) {
             case "N":
