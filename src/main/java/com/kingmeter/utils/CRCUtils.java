@@ -7,11 +7,16 @@ package com.kingmeter.utils;
 public class CRCUtils {
 
     private static CRCUtils instance;
-    private CRCUtils(){};
-    public static CRCUtils getInstance(){
-        if(instance == null){
-            synchronized(CRCUtils.class){
-                if(instance == null){
+
+    private CRCUtils() {
+    }
+
+    ;
+
+    public static CRCUtils getInstance() {
+        if (instance == null) {
+            synchronized (CRCUtils.class) {
+                if (instance == null) {
                     instance = new CRCUtils();
                 }
             }
@@ -19,20 +24,20 @@ public class CRCUtils {
         return instance;
     }
 
-    public String getCheckCrc(byte[] bytes) {
-        String crcStr = getCheckCrcString(bytes);
-        StringBuffer result = new StringBuffer();
-        result.append(crcStr.substring(0,2)).
-                append(" ").
-                append(crcStr.substring(2,4));
-        return result.toString();
-    }
+//    public String getCheckCrc(byte[] bytes) {
+//        String crcStr = getCheckCrcString(bytes);
+//        StringBuffer result = new StringBuffer();
+//        result.append(crcStr.substring(0,2)).
+//                append(" ").
+//                append(crcStr.substring(2,4));
+//        return result.toString();
+//    }
 
     public byte[] getCheckCrcArray(byte[] bytes) {
         String crcStr = getCheckCrcString(bytes);
         byte[] result = new byte[2];
-        result[0] = (byte) Integer.parseInt(crcStr.substring(0,2),16);
-        result[1] = (byte)Integer.parseInt(crcStr.substring(2,4),16);
+        result[0] = (byte) Integer.parseInt(crcStr.substring(0, 2), 16);
+        result[1] = (byte) Integer.parseInt(crcStr.substring(2, 4), 16);
         return result;
     }
 
@@ -54,9 +59,10 @@ public class CRCUtils {
         return String.format("%04x", crc);
     }
 
-    public boolean validate(byte[] toCheckByteArray,String crcCode) {
-        String byte2crcStr = getCheckCrc(toCheckByteArray);
-        if(byte2crcStr.equals(crcCode)){
+    public boolean validate(byte[] toCheckByteArray, byte crc1, byte crc2) {
+        byte[] checkCrcArray = getCheckCrcArray(toCheckByteArray);
+
+        if (checkCrcArray[0] == crc1 && checkCrcArray[1] == crc2) {
             return true;
         }
         return false;
