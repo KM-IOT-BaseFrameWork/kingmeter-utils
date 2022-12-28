@@ -22,13 +22,29 @@ public class TokenUtils {
         return instance;
     }
 
-    public TokenResult getRandomSiteToken(ConcurrentMap<String, String> existTokenMap) {
-        TokenResult tmpToken = createToken(32);
-        if (existTokenMap.containsKey(tmpToken)) {
-            return getRandomSiteToken(existTokenMap);
+    public TokenResult getRandomSiteToken(String oldToken, byte[] oldTokenArray,
+                                          ConcurrentMap<String, String> existTokenMap) {
+        TokenResult result = createToken(32);
+        if (!oldToken.equals("00000000000000000000000000000000")) {
+            //this means the site relogin with old token,
+            if (existTokenMap.containsKey(oldToken)) {
+                return new TokenResult(oldToken, oldTokenArray, true);
+            }
+        } else {
+            if (existTokenMap.containsKey(result.getToken())) {
+                return getRandomSiteToken(oldToken, oldTokenArray, existTokenMap);
+            }
         }
-        return tmpToken;
+        return result;
     }
+
+//    public TokenResult getRandomSiteToken(ConcurrentMap<String, String> existTokenMap) {
+//        TokenResult tmpToken = createToken(32);
+//        if (existTokenMap.containsKey(tmpToken)) {
+//            return getRandomSiteToken(existTokenMap);
+//        }
+//        return tmpToken;
+//    }
 
     public TokenResult getRandomLockToken(ConcurrentMap<String, String> existTokenMap) {
         TokenResult tmpToken = createToken(4);
@@ -47,7 +63,7 @@ public class TokenUtils {
             token.append(Integer.toHexString(tmp));
         }
         return new TokenResult(token.toString(),
-                tokenArray);
+                tokenArray,false);
     }
 
 

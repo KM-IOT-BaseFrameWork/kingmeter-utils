@@ -8,4 +8,5 @@ import lombok.Data;
 public class TokenResult {
     String token;
     byte[] tokenArray;
+    boolean reLogin;//the station will re login if the network is not stable at that moment
 }
