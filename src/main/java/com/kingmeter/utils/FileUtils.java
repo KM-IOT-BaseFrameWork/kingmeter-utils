@@ -3,6 +3,7 @@ package com.kingmeter.utils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 
 
 public class FileUtils {
@@ -11,7 +12,7 @@ public class FileUtils {
 
     private FileUtils() {}
 
-    public static FileUtils getInstance() {
+    public static synchronized FileUtils getInstance() {
         if (instance == null) {
             synchronized (FileUtils.class) {
                 if (instance == null) {
@@ -22,14 +23,17 @@ public class FileUtils {
         return instance;
     }
 
-    public String ReadFile(String Path) {
+    public String ReadFile(String path) {
+        FileInputStream fileInputStream = null;
+        InputStreamReader inputStreamReader = null;
         BufferedReader reader = null;
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         try {
-            FileInputStream fileInputStream = new FileInputStream(Path);
-            InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream, "UTF-8");
+            fileInputStream = new FileInputStream(path);
+            inputStreamReader =
+                    new InputStreamReader(fileInputStream, StandardCharsets.UTF_8);
             reader = new BufferedReader(inputStreamReader);
-            String tempString = "";
+            String tempString;
             while ((tempString = reader.readLine()) != null) {
                 sb.append(tempString);
             }
@@ -44,16 +48,29 @@ public class FileUtils {
                     e.printStackTrace();
                 }
             }
+            if(inputStreamReader != null){
+                try {
+                    inputStreamReader.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            if(fileInputStream != null){
+                try {
+                    fileInputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
         return sb.toString();
     }
 
-    public void WriteFile(String str, String Path) {
-        StringBuffer sb = new StringBuffer();
+    public void WriteFile(String str, String path) {
         FileOutputStream out = null;
         try {
-            out = new FileOutputStream(Path);
-            out.write(str.getBytes("UTF-8"));
+            out = new FileOutputStream(path);
+            out.write(str.getBytes(StandardCharsets.UTF_8));
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
@@ -75,17 +92,15 @@ public class FileUtils {
             InputStream is = file.getInputStream();
             int n = 1024;
             byte buffer[] = new byte[n];
-            int length = 0;
+            int length;
             while ((length = is.read(buffer)) != -1) {
                 result.write(buffer, 0, length);
             }
-            sb = result.toString("UTF-8");
+            sb = new String(buffer);
             is.close();
             result.close();
         } catch (IOException ioe) {
             ioe.printStackTrace();
-        } catch (Exception e) {
-            e.printStackTrace();
         }
         return sb;
     }

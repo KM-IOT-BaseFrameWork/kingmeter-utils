@@ -33,16 +33,17 @@ public class CloseableHttpClientBeanUtil {
 
     private CloseableHttpClientBeanUtil() {}
 
-    public static CloseableHttpClientBeanUtil getInstance() {
+    public static synchronized CloseableHttpClientBeanUtil getInstance() {
         if (instance == null) {
-            synchronized (FileUtils.class) {
+            synchronized (CloseableHttpClientBeanUtil.class) {
                 if (instance == null) {
-                    instance = new CloseableHttpClientBeanUtil();
+                    CloseableHttpClientBeanUtil tmp = new CloseableHttpClientBeanUtil();
                     try{
-                        instance.setCloseableHttpClient(getCloseableHttpClientBean());
+                        tmp.setCloseableHttpClient(getCloseableHttpClientBean());
                     }catch (Exception e){
                         e.printStackTrace();
                     }
+                    instance = tmp;
                 }
             }
         }

@@ -35,4 +35,9 @@ public class MD5Util {
 			"6", "7", "8", "9", "a", "b", "c", "d", "e", "f" };
 
 
+//	public static void main(String[] args) {
+//		byte[] passwordArray = {49, 50, 51, 52, 53, 54};
+//		String passwordMd5 = MD5Util.MD5Encode(passwordArray);
+//		System.out.println(passwordMd5);
+//	}
 }

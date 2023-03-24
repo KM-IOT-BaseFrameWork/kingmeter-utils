@@ -6,7 +6,7 @@ import java.util.Date;
 public class DateUtils {
     private static DateUtils instance;
     private DateUtils(){};
-    public static DateUtils getInstance(){
+    public static synchronized DateUtils getInstance(){
         if(instance == null){
             synchronized(DateUtils.class){
                 if(instance == null){

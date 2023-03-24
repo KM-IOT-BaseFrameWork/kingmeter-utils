@@ -11,7 +11,7 @@ import java.util.Date;
 public class HardWareUtils {
     private static HardWareUtils instance;
     private HardWareUtils(){}
-    public static HardWareUtils getInstance() {
+    public static synchronized HardWareUtils getInstance() {
         if (instance == null) {
             synchronized (HardWareUtils.class) {
                 if (instance == null) {

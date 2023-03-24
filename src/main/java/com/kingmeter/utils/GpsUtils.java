@@ -4,8 +4,8 @@ package com.kingmeter.utils;
 public class GpsUtils {
 
     private static GpsUtils instance;
-    private GpsUtils(){};
-    public static GpsUtils getInstance(){
+    private GpsUtils(){}
+    public static synchronized GpsUtils getInstance(){
         if(instance == null){
             synchronized(GpsUtils.class){
                 if(instance == null){
@@ -77,13 +77,9 @@ public class GpsUtils {
 //    }
 
     private int changeHead(String head) {
-        switch (head) {
-            case "N":
-                return 1;
-            case "E":
-                return 1;
-            default:
-                return -1;
+        if (head.equals("N") || head.equals("E")){
+            return 1;
         }
+        return -1;
     }
 }

@@ -1,6 +1,5 @@
 package com.kingmeter.utils;
 
-import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ConcurrentMap;
 
@@ -11,7 +10,7 @@ public class TokenUtils {
     }
 
 
-    public static TokenUtils getInstance() {
+    public static synchronized TokenUtils getInstance() {
         if (instance == null) {
             synchronized (TokenUtils.class) {
                 if (instance == null) {
